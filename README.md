@@ -1,4 +1,4 @@
-# Hi there, I’m Dmitrii!
+# Hi there, I’m Dmitry!
 
 
 ## My Stack
