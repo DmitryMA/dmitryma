@@ -6,7 +6,6 @@
 
 ## My Stats
 <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=DmitryMA&layout=compact&count_private=true" />
-![](https://leetcard.jacoblin.cool/leetcode?site=cn)
 
 
 - 🔭 I’m currently working on an AI-powered Telegram bot with image-generation features (Go, AWS Bedrock, Vertex AI) and refining Go microservices from interview projects  
