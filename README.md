@@ -1,9 +1,17 @@
 ## Hi there 👋
 
 <!--
-**DmitryMA/dmitryma** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+# Hi there, I’m Dmitrii!
 
-Here are some ideas to get you started:
+
+## My Stack
+
+<a href="https://skillicons.dev" target="_blank" rel="noopener">
+  <img src="https://skillicons.dev/icons?i=go,ts,react,graphql,terraform,docker,githubactions,aws,gcp,vercel" alt="Go, TypeScript, React, GraphQL, Terraform, Docker, GitHub Actions, AWS, GCP, Vercel" />
+</a>
+
+
+https://github-readme-stats.vercel.app/api/top-langs/?username=DmitryMA&layout=compact&count_private=true
 
 - 🔭 I’m currently working on ...
 - 🌱 I’m currently learning ...
