@@ -13,7 +13,7 @@
     <img
       title="JacobLinCool's LeetCode Stats"
       alt="LeetCode Stats"
-      src="https://leetcard.jacoblin.cool/dmitry_ma"
+      src="https://leetcard.jacoblin.cool/dmitry_ma?theme=light&font=Karma&ext=heatmap"
     />
 
   </p>
