@@ -5,12 +5,6 @@
      alt="java,typescript,nodejs,nextjs,react,js,graphql,aws,azure,gcp,go,ai" />
 
 ## My Stats
-<p>
-  <img
-    src="https://github-readme-stats.vercel.app/api/top-langs/?username=DmitryMA&layout=compact&count_private=true"
-    alt="Top Languages"
-  />
-</p>
 
 <p>
   <img
