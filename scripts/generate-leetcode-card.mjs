@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const USERNAME = process.env.LEETCODE_USERNAME || "dmitry_ma";
-const OUT_FILE = process.env.OUT_FILE || "assets/leetcode-card.svg";
+const OUT_FILE = process.env.OUT_FILE || "assets/leetcode-card-direct.svg";
 
 const query = `
 query getUserProfile($username: String!) {
