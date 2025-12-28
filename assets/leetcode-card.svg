@@ -1,30 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="420" height="140" viewBox="0 0 420 140" role="img" aria-label="LeetCode stats for dmitry_ma">
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160" viewBox="0 0 480 160" role="img" aria-label="LeetCode stats for dmitry_ma">
   <defs>
     <style>
-      .t1 { font: 700 16px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; fill: #111827; }
-      .t2 { font: 400 13px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; fill: #374151; }
-      .t3 { font: 400 12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; fill: #6b7280; }
-      .num { font: 700 20px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #111827; }
-      .lbl { font: 600 12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #6b7280; letter-spacing: .2px; }
+      .h1 { font: 700 16px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #111827; }
+      .muted { font: 600 11px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #6b7280; letter-spacing: .6px; }
+      .num { font: 750 22px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #111827; }
+      .small { font: 500 12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #6b7280; }
+
+      /* Индикаторы */
+      .track { fill: #eef2f7; }
+      .easy { fill: #22c55e; }
+      .med  { fill: #f59e0b; }
+      .hard { fill: #ef4444; }
     </style>
   </defs>
 
-  <rect x="0.5" y="0.5" width="419" height="139" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="0.5" y="0.5" width="479" height="159" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
 
-  <text x="18" y="28" class="t1">LeetCode — dmitry_ma</text>
+  <text x="18" y="30" class="h1">LeetCode — dmitry_ma</text>
 
-  <text x="18" y="58" class="lbl">TOTAL SOLVED</text>
-  <text x="18" y="86" class="num">660</text>
+  <rect x="372" y="14" width="92" height="22" rx="11" fill="#f3f4f6" stroke="#e5e7eb"/>
+  <text x="418" y="29" text-anchor="middle" class="small">Open profile</text>
 
-  <text x="165" y="58" class="lbl">EASY</text>
-  <text x="165" y="86" class="num">246</text>
+  <line x1="18" y1="44" x2="462" y2="44" stroke="#e5e7eb"/>
 
-  <text x="245" y="58" class="lbl">MEDIUM</text>
-  <text x="245" y="86" class="num">374</text>
+  <!-- TOTAL -->
+  <text x="18" y="70" class="muted">TOTAL SOLVED</text>
+  <text x="18" y="104" class="num">660</text>
 
-  <text x="345" y="58" class="lbl">HARD</text>
-  <text x="345" y="86" class="num">40</text>
+  <!-- separators -->
+  <line x1="150" y1="58" x2="150" y2="116" stroke="#e5e7eb"/>
+  <line x1="276" y1="58" x2="276" y2="116" stroke="#e5e7eb"/>
+  <line x1="372" y1="58" x2="372" y2="116" stroke="#e5e7eb"/>
 
-  <text x="18" y="118" class="t3">Updated: 2025-12-28</text>
+  <!-- EASY -->
+  <text x="168" y="70" class="muted">EASY</text>
+  <text x="168" y="104" class="num">246</text>
+  <rect x="168" y="112" width="86" height="8" rx="4" class="track"/>
+  <rect x="168" y="112" width="32" height="8" rx="4" class="easy"/>
+
+  <!-- MEDIUM -->
+  <text x="294" y="70" class="muted">MEDIUM</text>
+  <text x="294" y="104" class="num">374</text>
+  <rect x="294" y="112" width="86" height="8" rx="4" class="track"/>
+  <rect x="294" y="112" width="49" height="8" rx="4" class="med"/>
+
+  <!-- HARD -->
+  <text x="390" y="70" class="muted">HARD</text>
+  <text x="390" y="104" class="num">40</text>
+  <rect x="390" y="112" width="86" height="8" rx="4" class="track"/>
+  <rect x="390" y="112" width="5" height="8" rx="4" class="hard"/>
+
+  <text x="18" y="140" class="small">Updated: 2025-12-28 • Source: leetcode.com</text>
 </svg>
