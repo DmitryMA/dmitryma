@@ -2,7 +2,7 @@ name: Update Languages card
 
 on:
   schedule:
-    - cron: "0 23 * * *" # 00:00 по Белграду зимой (CET=UTC+1). Летом будет 01:00.
+    - cron: "15 20 * * *"
   workflow_dispatch:
 
 permissions:
