@@ -8,9 +8,8 @@
 
 <p>
   <img
-    title="LeetCode Stats"
     alt="LeetCode Stats"
-    src="https://leetcard.jacoblin.cool/dmitry_ma?theme=light&font=Karma&ext=heatmap"
+    src="https://raw.githubusercontent.com/DmitryMA/dmitryma/main/assets/leetcode-card.svg"
   />
 </p>
 
