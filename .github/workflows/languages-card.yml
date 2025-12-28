@@ -2,7 +2,7 @@ name: Update Languages card
 
 on:
   schedule:
-    - cron: "0 23 * * *"
+    - cron: "0 23 * * *" # 00:00 по Белграду зимой (CET=UTC+1). Летом будет 01:00.
   workflow_dispatch:
 
 permissions:
@@ -26,6 +26,9 @@ jobs:
           GH_USER: DmitryMA
           OUT_FILE: assets/languages-card.svg
           TOP_N: "8"
+          MIN_PCT: "2"
+          MIN_BYTES: "5000"
+          DENY_LANGS: "Dockerfile,Shell,Makefile,HCL,Terraform"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/generate-languages-card.mjs
 

@@ -1,15 +1,23 @@
-// scripts/generate-languages-card.mjs
 import fs from "node:fs";
 import path from "node:path";
 
-// simple-icons: инлайним path, не тянем картинки снаружи
+// Важно: используем этот импорт, чтобы получать иконки по ключу siXxx
 import * as si from "simple-icons/icons";
 
 const GH_USER = process.env.GH_USER || "DmitryMA";
 const OUT_FILE = process.env.OUT_FILE || "assets/languages-card.svg";
 const TOP_N = Number(process.env.TOP_N || 8);
 
-const GH_TOKEN = process.env.GITHUB_TOKEN || ""; // опционально, но в Actions будет
+const MIN_PCT = Number(process.env.MIN_PCT || 2); // скрывать < 2%
+const MIN_BYTES = Number(process.env.MIN_BYTES || 5000); // скрывать < 5KB
+const DENY = new Set(
+  (process.env.DENY_LANGS || "Dockerfile,Shell,Makefile,HCL,Terraform")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+);
+
+const GH_TOKEN = process.env.GITHUB_TOKEN || "";
 
 function esc(s) {
   return String(s)
@@ -29,8 +37,7 @@ function pascalCase(s) {
     .join("");
 }
 
-// Маппинг GitHub Linguist language -> simple-icons export
-// (можно расширять при необходимости)
+// Маппинг GitHub Linguist language -> simple-icons export key
 const ICON_MAP = {
   JavaScript: "siJavascript",
   TypeScript: "siTypescript",
@@ -60,7 +67,7 @@ function iconForLanguage(lang) {
 
 async function ghFetch(url) {
   const headers = {
-    "accept": "application/vnd.github+json",
+    accept: "application/vnd.github+json",
     "user-agent": "github-actions languages-card",
   };
   if (GH_TOKEN) headers.authorization = `Bearer ${GH_TOKEN}`;
@@ -74,78 +81,100 @@ async function listReposAllPages(user) {
   const repos = [];
   let page = 1;
 
-  // публичные репозитории пользователя
   while (true) {
     const batch = await ghFetch(
-      `https://api.github.com/users/${encodeURIComponent(user)}/repos?per_page=100&page=${page}&sort=updated`
+      `https://api.github.com/users/${encodeURIComponent(
+        user
+      )}/repos?per_page=100&page=${page}&sort=updated`
     );
     if (!Array.isArray(batch) || batch.length === 0) break;
     repos.push(...batch);
     page += 1;
     if (page > 20) break; // safety guard
   }
-
   return repos;
 }
 
 async function getRepoLanguages(owner, repo) {
-  // returns { "TypeScript": 12345, ... }
-  return ghFetch(`https://api.github.com/repos/${owner}/${repo}/languages`);
+  return ghFetch(
+    `https://api.github.com/repos/${encodeURIComponent(
+      owner
+    )}/${encodeURIComponent(repo)}/languages`
+  );
+}
+
+function abbrFor(name) {
+  const map = {
+    JavaScript: "JS",
+    TypeScript: "TS",
+    Python: "PY",
+    "C#": "C#",
+    "C++": "C++",
+  };
+  if (map[name]) return map[name];
+  if (name.length <= 3) return name.toUpperCase();
+  return name.slice(0, 2).toUpperCase();
 }
 
 function buildSvg({ items, updatedISO }) {
-  // Layout
-  const W = 760;
-  const H = 190;
+  // Layout: 6 плиток в ряд, 2 ряда максимум
   const pad = 18;
-
   const tileW = 120;
   const tileH = 96;
   const gap = 12;
+  const perRow = 6;
+
+  const rows = Math.max(1, Math.ceil(items.length / perRow));
+  const W = pad * 2 + perRow * tileW + (perRow - 1) * gap; // 792
+  const H = 64 + rows * tileH + (rows - 1) * gap + 34; // header + tiles + footer
+
   const startX = pad;
   const startY = 64;
 
-  // 1 row up to 6 tiles, then 2nd row
-  const perRow = 6;
+  const iconSize = 18;
+  const iconScale = iconSize / 24; // simple-icons paths are 24x24
+  const barTrackW = tileW - 28;
 
-  const tiles = items.map((it, idx) => {
-    const row = Math.floor(idx / perRow);
-    const col = idx % perRow;
-    const x = startX + col * (tileW + gap);
-    const y = startY + row * (tileH + gap);
+  const tiles = items
+    .map((it, idx) => {
+      const row = Math.floor(idx / perRow);
+      const col = idx % perRow;
+      const x = startX + col * (tileW + gap);
+      const y = startY + row * (tileH + gap);
 
-    const icon = it.icon; // { path, ... } | null
-    const iconSize = 18;
-    const iconX = x + 16;
-    const iconY = y + 18;
+      const icon = it.icon;
+      const accent = icon?.hex ? `#${icon.hex}` : "#111827";
 
-    // мини-бар
-    const barTrackW = tileW - 28;
-    const barFillW = Math.round((barTrackW * it.pct) / 100);
+      const iconX = x + 16;
+      const iconY = y + 18;
 
-    const iconSvg = icon
-      ? `
-      <g transform="translate(${iconX}, ${iconY})">
-        <svg width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="${icon.path}" fill="#111827"></path>
-        </svg>
+      const barFillW = Math.max(
+        0,
+        Math.min(barTrackW, Math.round((barTrackW * it.pct) / 100))
+      );
+
+      const iconSvg = icon
+        ? `
+      <g transform="translate(${iconX}, ${iconY}) scale(${iconScale})" aria-hidden="true">
+        <path d="${icon.path}" fill="${accent}"></path>
       </g>`
-      : `
+        : `
       <circle cx="${iconX + 9}" cy="${iconY + 9}" r="9" fill="#111827"/>
       <text x="${iconX + 9}" y="${iconY + 13}" text-anchor="middle" class="abbr" fill="#ffffff">${esc(
         it.abbr
       )}</text>`;
 
-    return `
+      return `
     <g>
-      <rect x="${x}" y="${y}" width="${tileW}" height="${tileH}" rx="14" fill="#f8fafc" stroke="#e5e7eb"/>
+      <rect x="${x}" y="${y}" width="${tileW}" height="${tileH}" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
       ${iconSvg}
       <text x="${x + 40}" y="${y + 32}" class="name">${esc(it.name)}</text>
       <text x="${x + 40}" y="${y + 56}" class="pct">${it.pct}%</text>
       <rect x="${x + 14}" y="${y + 72}" width="${barTrackW}" height="8" rx="4" fill="#eef2f7"/>
-      <rect x="${x + 14}" y="${y + 72}" width="${barFillW}" height="8" rx="4" fill="#111827"/>
+      <rect x="${x + 14}" y="${y + 72}" width="${barFillW}" height="8" rx="4" fill="${accent}"/>
     </g>`;
-  });
+    })
+    .join("");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Languages used across GitHub repos">
@@ -164,59 +193,55 @@ function buildSvg({ items, updatedISO }) {
   <text x="${pad}" y="30" class="h1">Languages used</text>
   <text x="${pad}" y="48" class="sub">Across public repos • Updated: ${esc(updatedISO)}</text>
 
-  ${tiles.join("")}
+  ${tiles}
 
   <text x="${pad}" y="${H - 14}" class="foot">Source: GitHub Linguist (repo languages API) • Icons: simple-icons</text>
 </svg>`;
 }
 
-function abbrFor(name) {
-  const map = {
-    JavaScript: "JS",
-    TypeScript: "TS",
-    Python: "PY",
-    "C#": "C#",
-    "C++": "C++",
-  };
-  if (map[name]) return map[name];
-  if (name.length <= 3) return name.toUpperCase();
-  return name.slice(0, 2).toUpperCase();
-}
-
 async function main() {
   const repos = await listReposAllPages(GH_USER);
 
-  // фильтры: обычно полезно убрать forks/archived
-  const filtered = repos.filter((r) => !r.fork && !r.archived);
+  // исключаем forks и archived
+  const filteredRepos = repos.filter((r) => !r.fork && !r.archived);
 
   const totals = new Map(); // lang -> bytes
 
-  for (const r of filtered) {
+  for (const r of filteredRepos) {
     try {
       const langs = await getRepoLanguages(GH_USER, r.name);
       for (const [lang, bytes] of Object.entries(langs)) {
-        totals.set(lang, (totals.get(lang) || 0) + Number(bytes || 0));
+        if (DENY.has(lang)) continue;
+        const b = Number(bytes || 0);
+        if (b <= 0) continue;
+        totals.set(lang, (totals.get(lang) || 0) + b);
       }
     } catch {
-      // repo может быть недоступен/лимит; пропускаем
+      // пропускаем отдельные ошибки / лимиты
     }
   }
 
-  const entries = [...totals.entries()].filter(([, v]) => v > 0);
-  entries.sort((a, b) => b[1] - a[1]);
+  const entries = [...totals.entries()].sort((a, b) => b[1] - a[1]);
 
-  const top = entries.slice(0, TOP_N);
-  const sum = top.reduce((acc, [, v]) => acc + v, 0) || 1;
+  // берём TOP_N, но сначала отсечём совсем мелкие по байтам
+  const topRaw = entries.filter(([, bytes]) => bytes >= MIN_BYTES).slice(0, TOP_N);
 
-  const items = top.map(([name, bytes]) => {
-    const pct = Math.round((bytes * 100) / sum);
-    const icon = iconForLanguage(name);
-    return { name, pct, icon, abbr: abbrFor(name) };
-  });
+  // Если после MIN_BYTES ничего не осталось — берём просто TOP_N как fallback
+  const chosen = topRaw.length ? topRaw : entries.slice(0, TOP_N);
 
-  // корректируем сумму процентов до 100 (из-за округлений)
+  const sum = chosen.reduce((acc, [, v]) => acc + v, 0) || 1;
+
+  let items = chosen
+    .map(([name, bytes]) => {
+      const pct = Math.round((bytes * 100) / sum);
+      const icon = iconForLanguage(name);
+      return { name, pct, icon, abbr: abbrFor(name) };
+    })
+    .filter((it) => it.pct >= MIN_PCT); // скрыть “не используется”
+
+  // корректируем сумму процентов до 100
   const pctSum = items.reduce((a, x) => a + x.pct, 0);
-  if (items.length && pctSum !== 100) items[0].pct += (100 - pctSum);
+  if (items.length && pctSum !== 100) items[0].pct += 100 - pctSum;
 
   const updatedISO = new Date().toISOString().slice(0, 10);
   const svg = buildSvg({ items, updatedISO });
