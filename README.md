@@ -6,13 +6,9 @@
 
 ## My Stats
 
-<p>
-  <img
-    title="LeetCode Stats"
-    alt="LeetCode Stats"
-    src="https://raw.githubusercontent.com/DmitryMA/dmitryma/main/assets/leetcode-card.svg"
-  />
-</p>
+![Languages used](https://raw.githubusercontent.com/DmitryMA/dmitryma/main/assets/languages-card.svg)
+
+[![LeetCode Stats](https://raw.githubusercontent.com/DmitryMA/dmitryma/main/assets/leetcode-card.svg)](https://leetcode.com/u/dmitry_ma/)
 
 - 🔭 Currently working on an AI-powered Telegram bot with image-generation features, primarily focusing on **Java-based backend architecture**, cloud integrations, and system design.  
   Additionally experimenting with **Go** for selected microservices and interview-driven prototypes.
