@@ -8,6 +8,7 @@
 
 <p>
   <img
+    title="LeetCode Stats"
     alt="LeetCode Stats"
     src="https://raw.githubusercontent.com/DmitryMA/dmitryma/main/assets/leetcode-card.svg"
   />
