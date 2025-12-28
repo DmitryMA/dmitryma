@@ -26,8 +26,8 @@ jobs:
           GH_USER: DmitryMA
           OUT_FILE: assets/languages-card.svg
           TOP_N: "8"
-          MIN_PCT: "2"
-          MIN_BYTES: "5000"
+          MIN_PCT: "1"
+          MIN_BYTES: "1000"
           DENY_LANGS: "Dockerfile,Shell,Makefile,HCL,Terraform"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/generate-languages-card.mjs
