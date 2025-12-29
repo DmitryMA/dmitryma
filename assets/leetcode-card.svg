@@ -6,8 +6,6 @@
       .muted { font: 600 11px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #6b7280; letter-spacing: .6px; }
       .num { font: 750 22px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #111827; }
       .small { font: 500 12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #6b7280; }
-
-      /* Индикаторы */
       .track { fill: #eef2f7; }
       .easy { fill: #22c55e; }
       .med  { fill: #f59e0b; }
@@ -19,37 +17,29 @@
 
   <text x="18" y="30" class="h1">LeetCode — dmitry_ma</text>
 
-  <rect x="372" y="14" width="92" height="22" rx="11" fill="#f3f4f6" stroke="#e5e7eb"/>
-  <text x="418" y="29" text-anchor="middle" class="small">Open profile</text>
-
   <line x1="18" y1="44" x2="462" y2="44" stroke="#e5e7eb"/>
 
-  <!-- TOTAL -->
   <text x="18" y="70" class="muted">TOTAL SOLVED</text>
-  <text x="18" y="104" class="num">660</text>
+  <text x="18" y="104" class="num">661</text>
 
-  <!-- separators -->
   <line x1="150" y1="58" x2="150" y2="116" stroke="#e5e7eb"/>
   <line x1="276" y1="58" x2="276" y2="116" stroke="#e5e7eb"/>
   <line x1="372" y1="58" x2="372" y2="116" stroke="#e5e7eb"/>
 
-  <!-- EASY -->
   <text x="168" y="70" class="muted">EASY</text>
   <text x="168" y="104" class="num">246</text>
   <rect x="168" y="112" width="86" height="8" rx="4" class="track"/>
   <rect x="168" y="112" width="32" height="8" rx="4" class="easy"/>
 
-  <!-- MEDIUM -->
   <text x="294" y="70" class="muted">MEDIUM</text>
-  <text x="294" y="104" class="num">374</text>
+  <text x="294" y="104" class="num">375</text>
   <rect x="294" y="112" width="86" height="8" rx="4" class="track"/>
   <rect x="294" y="112" width="49" height="8" rx="4" class="med"/>
 
-  <!-- HARD -->
   <text x="390" y="70" class="muted">HARD</text>
   <text x="390" y="104" class="num">40</text>
   <rect x="390" y="112" width="86" height="8" rx="4" class="track"/>
   <rect x="390" y="112" width="5" height="8" rx="4" class="hard"/>
 
-  <text x="18" y="140" class="small">Updated: 2025-12-28 • Source: leetcode.com</text>
+  <text x="18" y="140" class="small">Updated: 2025-12-29 • Source: leetcode.com</text>
 </svg>
