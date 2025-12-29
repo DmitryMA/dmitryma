@@ -2,7 +2,7 @@ name: Update LeetCode card
 
 on:
   schedule:
-    - cron: "0 23 * * *"
+    - cron: "0 23 * * *" # 00:00 по Белграду зимой (CET=UTC+1). Летом будет 01:00.
   workflow_dispatch:
 
 permissions:
@@ -23,6 +23,12 @@ jobs:
           LEETCODE_USERNAME: dmitry_ma
           OUT_FILE: assets/leetcode-card.svg
         run: node scripts/generate-leetcode-card.mjs
+
+      - name: Validate SVG
+        run: |
+          test -s assets/leetcode-card.svg
+          grep -q "LeetCode" assets/leetcode-card.svg
+          grep -q "<svg" assets/leetcode-card.svg
 
       - name: Commit changes
         run: |

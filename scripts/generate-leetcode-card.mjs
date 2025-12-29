@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const USERNAME = process.env.LEETCODE_USERNAME || "dmitry_ma";
-const OUT_FILE = process.env.OUT_FILE || "assets/leetcode-card-direct.svg";
+const OUT_FILE = process.env.OUT_FILE || "assets/leetcode-card.svg";
 
 const query = `
 query getUserProfile($username: String!) {
@@ -33,13 +33,12 @@ function buildSvg({ username, easy, medium, hard, updatedISO }) {
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const ratio = (v) => (total > 0 ? v / total : 0);
 
-  // Геометрия баров
   const barW = 86;
   const barH = 8;
   const r = 4;
 
   const wEasy = Math.round(barW * clamp(ratio(easy), 0, 1));
-  const wMed  = Math.round(barW * clamp(ratio(medium), 0, 1));
+  const wMed = Math.round(barW * clamp(ratio(medium), 0, 1));
   const wHard = Math.round(barW * clamp(ratio(hard), 0, 1));
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -50,8 +49,6 @@ function buildSvg({ username, easy, medium, hard, updatedISO }) {
       .muted { font: 600 11px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #6b7280; letter-spacing: .6px; }
       .num { font: 750 22px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #111827; }
       .small { font: 500 12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #6b7280; }
-
-      /* Индикаторы */
       .track { fill: #eef2f7; }
       .easy { fill: #22c55e; }
       .med  { fill: #f59e0b; }
@@ -63,33 +60,25 @@ function buildSvg({ username, easy, medium, hard, updatedISO }) {
 
   <text x="18" y="30" class="h1">LeetCode — ${esc(username)}</text>
 
-  <rect x="372" y="14" width="92" height="22" rx="11" fill="#f3f4f6" stroke="#e5e7eb"/>
-  <text x="418" y="29" text-anchor="middle" class="small">Open profile</text>
-
   <line x1="18" y1="44" x2="462" y2="44" stroke="#e5e7eb"/>
 
-  <!-- TOTAL -->
   <text x="18" y="70" class="muted">TOTAL SOLVED</text>
   <text x="18" y="104" class="num">${total}</text>
 
-  <!-- separators -->
   <line x1="150" y1="58" x2="150" y2="116" stroke="#e5e7eb"/>
   <line x1="276" y1="58" x2="276" y2="116" stroke="#e5e7eb"/>
   <line x1="372" y1="58" x2="372" y2="116" stroke="#e5e7eb"/>
 
-  <!-- EASY -->
   <text x="168" y="70" class="muted">EASY</text>
   <text x="168" y="104" class="num">${easy}</text>
   <rect x="168" y="112" width="${barW}" height="${barH}" rx="${r}" class="track"/>
   <rect x="168" y="112" width="${wEasy}" height="${barH}" rx="${r}" class="easy"/>
 
-  <!-- MEDIUM -->
   <text x="294" y="70" class="muted">MEDIUM</text>
   <text x="294" y="104" class="num">${medium}</text>
   <rect x="294" y="112" width="${barW}" height="${barH}" rx="${r}" class="track"/>
   <rect x="294" y="112" width="${wMed}" height="${barH}" rx="${r}" class="med"/>
 
-  <!-- HARD -->
   <text x="390" y="70" class="muted">HARD</text>
   <text x="390" y="104" class="num">${hard}</text>
   <rect x="390" y="112" width="${barW}" height="${barH}" rx="${r}" class="track"/>
@@ -99,17 +88,24 @@ function buildSvg({ username, easy, medium, hard, updatedISO }) {
 </svg>`;
 }
 
-
 async function main() {
-  const res = await fetch("https://leetcode.com/graphql", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      // User-Agent иногда помогает пройти простые фильтры.
-      "user-agent": "github-actions (leetcode-card-generator)"
-    },
-    body: JSON.stringify({ query, variables: { username: USERNAME } }),
-  });
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 15000);
+
+  let res;
+  try {
+    res = await fetch("https://leetcode.com/graphql", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "user-agent": "github-actions (leetcode-card-generator)",
+      },
+      body: JSON.stringify({ query, variables: { username: USERNAME } }),
+      signal: ctrl.signal,
+    });
+  } finally {
+    clearTimeout(t);
+  }
 
   if (!res.ok) {
     throw new Error(`LeetCode GraphQL HTTP ${res.status}`);
@@ -119,7 +115,9 @@ async function main() {
   const user = json?.data?.matchedUser;
 
   if (!user?.submitStatsGlobal?.acSubmissionNum) {
-    throw new Error(`Unexpected response structure: ${JSON.stringify(json).slice(0, 400)}...`);
+    throw new Error(
+      `Unexpected response structure: ${JSON.stringify(json).slice(0, 400)}...`
+    );
   }
 
   const nums = user.submitStatsGlobal.acSubmissionNum;
@@ -129,8 +127,12 @@ async function main() {
   const medium = Number(map.Medium ?? 0);
   const hard = Number(map.Hard ?? 0);
 
-  const updatedISO = new Date().toISOString().slice(0, 10);
+  const total = easy + medium + hard;
+  if (!Number.isFinite(total) || total <= 0) {
+    throw new Error("LeetCode returned zero stats; refusing to overwrite SVG.");
+  }
 
+  const updatedISO = new Date().toISOString().slice(0, 10);
   const svg = buildSvg({
     username: user.username || USERNAME,
     easy,
@@ -140,7 +142,9 @@ async function main() {
   });
 
   fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
-  fs.writeFileSync(OUT_FILE, svg, "utf8");
+  const tmp = `${OUT_FILE}.tmp`;
+  fs.writeFileSync(tmp, svg, "utf8");
+  fs.renameSync(tmp, OUT_FILE);
 }
 
 main().catch((e) => {

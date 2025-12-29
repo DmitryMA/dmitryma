@@ -29,6 +29,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/generate-languages-card.mjs
 
+      - name: Validate SVG
+        run: |
+          test -s assets/languages-card.svg
+          grep -q "Languages used" assets/languages-card.svg
+          grep -q "<svg" assets/languages-card.svg
+
       - name: Commit changes
         run: |
           if git diff --quiet; then

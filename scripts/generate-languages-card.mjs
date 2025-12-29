@@ -6,8 +6,8 @@ const GH_USER = process.env.GH_USER || "DmitryMA";
 const OUT_FILE = process.env.OUT_FILE || "assets/languages-card.svg";
 const TOP_N = Number(process.env.TOP_N || 8);
 
-const MIN_PCT = Number(process.env.MIN_PCT || 2); // скрывать < 2%
-const MIN_BYTES = Number(process.env.MIN_BYTES || 5000); // скрывать < 5KB
+const MIN_PCT = Number(process.env.MIN_PCT || 2);
+const MIN_BYTES = Number(process.env.MIN_BYTES || 5000);
 const DENY = new Set(
   (process.env.DENY_LANGS || "Dockerfile,Shell,Makefile,HCL,Terraform")
     .split(",")
@@ -17,7 +17,7 @@ const DENY = new Set(
 
 const GH_TOKEN = process.env.GITHUB_TOKEN || "";
 
-// Ваши “фирменные” цвета для языков (стабильные, под вашим контролем)
+// Stable palette under your control
 const COLOR_FALLBACK = {
   TypeScript: "#3178C6",
   JavaScript: "#F7DF1E",
@@ -44,9 +44,17 @@ async function ghFetch(url) {
   };
   if (GH_TOKEN) headers.authorization = `Bearer ${GH_TOKEN}`;
 
-  const res = await fetch(url, { headers });
-  if (!res.ok) throw new Error(`GitHub API ${res.status}: ${url}`);
-  return res.json();
+  // small timeout to avoid hanging
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 15000);
+
+  try {
+    const res = await fetch(url, { headers, signal: ctrl.signal });
+    if (!res.ok) throw new Error(`GitHub API ${res.status}: ${url}`);
+    return res.json();
+  } finally {
+    clearTimeout(t);
+  }
 }
 
 async function listReposAllPages(user) {
@@ -64,7 +72,6 @@ async function listReposAllPages(user) {
     page += 1;
     if (page > 20) break;
   }
-
   return repos;
 }
 
@@ -93,17 +100,12 @@ function colorForLanguage(lang, faIcon) {
   return faIcon?.color || COLOR_FALLBACK[lang] || "#111827";
 }
 
-/**
- * Отрисовка Font Awesome SVG путей без вложенного <svg>
- * icon: { width, height, paths[], color }
- */
 function renderFAIcon({ icon, x, y, size, fill }) {
   if (!icon) return "";
   const w = icon.width;
   const h = icon.height;
   const scale = size / Math.max(w, h);
 
-  // центрирование в квадрат size x size
   const tx = x + (size - w * scale) / 2;
   const ty = y + (size - h * scale) / 2;
 
@@ -114,15 +116,11 @@ function renderFAIcon({ icon, x, y, size, fill }) {
   return `<g transform="translate(${tx}, ${ty}) scale(${scale})" aria-hidden="true">${paths}</g>`;
 }
 
-/**
- * Фоллбэк-иконка (монограмма) — используется и для TypeScript.
- */
 function renderMonogram({ label, x, y, size, bg, fg }) {
   const r = size / 2;
   const cx = x + r;
   const cy = y + r;
 
-  // центр по вертикали: + (fontSize*0.35) примерно
   const fontSize = Math.round(size * 0.55);
   const textY = cy + Math.round(fontSize * 0.35);
 
@@ -147,7 +145,7 @@ function buildSvg({ items, updatedISO }) {
   const startX = pad;
   const startY = 64;
 
-  const iconSize = 24; // чуть больше, чтобы FA лучше читался
+  const iconSize = 24;
   const barTrackW = tileW - 28;
 
   const tiles = items
@@ -166,17 +164,8 @@ function buildSvg({ items, updatedISO }) {
         Math.min(barTrackW, Math.round((barTrackW * it.pct) / 100))
       );
 
-      // Иконка:
-      // - Java/JS/Go: Font Awesome
-      // - TypeScript/прочие: монограмма
       const iconSvg = it.faIcon
-        ? renderFAIcon({
-            icon: it.faIcon,
-            x: iconX,
-            y: iconY,
-            size: iconSize,
-            fill: accent,
-          })
+        ? renderFAIcon({ icon: it.faIcon, x: iconX, y: iconY, size: iconSize, fill: accent })
         : renderMonogram({
             label: it.abbr,
             x: iconX,
@@ -223,29 +212,36 @@ function buildSvg({ items, updatedISO }) {
 
 async function main() {
   const repos = await listReposAllPages(GH_USER);
-  const filteredRepos = repos.filter((r) => !r.fork && !r.archived);
 
-  const totals = new Map(); // lang -> bytes
+  const filteredRepos = repos.filter((r) => !r.fork && !r.archived);
+  if (!filteredRepos.length) {
+    throw new Error("No repos found (or all filtered). Refusing to overwrite SVG.");
+  }
+
+  const totals = new Map();
+
   for (const r of filteredRepos) {
-    try {
-      const langs = await getRepoLanguages(GH_USER, r.name);
-      for (const [lang, bytes] of Object.entries(langs)) {
-        if (DENY.has(lang)) continue;
-        const b = Number(bytes || 0);
-        if (b <= 0) continue;
-        totals.set(lang, (totals.get(lang) || 0) + b);
-      }
-    } catch {
-      // ignore per-repo failures
+    const langs = await getRepoLanguages(GH_USER, r.name); // if fails -> throw -> no overwrite
+    for (const [lang, bytes] of Object.entries(langs)) {
+      if (DENY.has(lang)) continue;
+      const b = Number(bytes || 0);
+      if (b <= 0) continue;
+      totals.set(lang, (totals.get(lang) || 0) + b);
     }
   }
 
   const entries = [...totals.entries()].sort((a, b) => b[1] - a[1]);
+  if (!entries.length) {
+    throw new Error("No language bytes computed. Refusing to overwrite SVG.");
+  }
 
   const topRaw = entries.filter(([, bytes]) => bytes >= MIN_BYTES).slice(0, TOP_N);
   const chosen = topRaw.length ? topRaw : entries.slice(0, TOP_N);
 
-  const sum = chosen.reduce((acc, [, v]) => acc + v, 0) || 1;
+  const sum = chosen.reduce((acc, [, v]) => acc + v, 0);
+  if (!Number.isFinite(sum) || sum <= 0) {
+    throw new Error("Invalid language sum. Refusing to overwrite SVG.");
+  }
 
   let items = chosen
     .map(([name, bytes]) => {
@@ -255,17 +251,22 @@ async function main() {
       const accent = colorForLanguage(name, faIcon);
       return { name, pct, faIcon, abbr, accent };
     })
-    .filter((it) => it.pct >= MIN_PCT); // скрываем “не используется”
+    .filter((it) => it.pct >= MIN_PCT);
 
-  // корректируем сумму процентов до 100
+  if (!items.length) {
+    throw new Error("No language items after filters. Refusing to overwrite SVG.");
+  }
+
   const pctSum = items.reduce((a, x) => a + x.pct, 0);
-  if (items.length && pctSum !== 100) items[0].pct += 100 - pctSum;
+  if (pctSum !== 100) items[0].pct += 100 - pctSum;
 
   const updatedISO = new Date().toISOString().slice(0, 10);
   const svg = buildSvg({ items, updatedISO });
 
   fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
-  fs.writeFileSync(OUT_FILE, svg, "utf8");
+  const tmp = `${OUT_FILE}.tmp`;
+  fs.writeFileSync(tmp, svg, "utf8");
+  fs.renameSync(tmp, OUT_FILE);
 }
 
 main().catch((e) => {
