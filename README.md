@@ -2,7 +2,7 @@
 
 ## My Stack
 <img src="https://skillicons.dev/icons?i=java,typescript,nodejs,nextjs,react,js,graphql,aws,azure,gcp,go,ai" 
-     alt="java,typescript,nodejs,nextjs,react,js,graphql,aws,azure,gcp,go,ai" />
+     alt="java,typescript,nodejs,nextjs,react,js,graphql,aws,azure,gcp,rust,ai" />
 
 ## My Stats
 
