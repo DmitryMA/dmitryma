@@ -1,7 +1,7 @@
 # Hi there, I’m Dmitry!
 
 ## My Stack
-<img src="https://skillicons.dev/icons?i=java,typescript,nodejs,nextjs,react,js,graphql,aws,azure,gcp,rust,ai" 
+<img src="https://skillicons.dev/icons?i=rust,java,typescript,nodejs,nextjs,react,js,graphql,aws,azure,gcp,ai" 
      alt="java,typescript,nodejs,nextjs,react,js,graphql,aws,azure,gcp,rust,ai" />
 
 ## My Stats
