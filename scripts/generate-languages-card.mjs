@@ -19,6 +19,7 @@ const GH_TOKEN = process.env.GITHUB_TOKEN || "";
 
 // Stable palette under your control
 const COLOR_FALLBACK = {
+  Rust: "#DEA584",
   TypeScript: "#3178C6",
   JavaScript: "#F7DF1E",
   Go: "#00ADD8",
@@ -85,6 +86,7 @@ async function getRepoLanguages(owner, repo) {
 
 function abbrFor(name) {
   const map = {
+    Rust: "RS",
     JavaScript: "JS",
     TypeScript: "TS",
     Python: "PY",
