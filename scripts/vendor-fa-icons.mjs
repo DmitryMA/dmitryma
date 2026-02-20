@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { faJava, faJs, faGolang } from "@fortawesome/free-brands-svg-icons";
+import { faRust, faJava, faJs, faGolang } from "@fortawesome/free-brands-svg-icons";
 
 const OUT_FILE = process.env.OUT_FILE || "scripts/icons.fa.vendored.js";
 
