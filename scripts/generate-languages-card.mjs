@@ -7,7 +7,7 @@ const OUT_FILE = process.env.OUT_FILE || "assets/languages-card.svg";
 const TOP_N = Number(process.env.TOP_N || 8);
 
 const MIN_PCT = Number(process.env.MIN_PCT || 2);
-const MIN_BYTES = Number(process.env.MIN_BYTES || 5000);
+const MIN_BYTES = Number(process.env.MIN_BYTES || 5);
 const DENY = new Set(
   (process.env.DENY_LANGS || "Dockerfile,Shell,Makefile,HCL,Terraform")
     .split(",")
