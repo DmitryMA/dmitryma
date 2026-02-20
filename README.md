@@ -10,8 +10,10 @@
 
 [![LeetCode Stats](https://raw.githubusercontent.com/DmitryMA/dmitryma/main/assets/leetcode-card.svg)](https://leetcode.com/u/dmitry_ma/)
 
-🔭 Currently working on an AI-powered Telegram bot with image generation capabilities, primarily focused on Java-based backend architecture, cloud integrations, and system design.
-In parallel, experimenting with Go for selected microservices and interview-oriented, high-performance prototypes.
+🔭 Currently working on an AI-powered Telegram bot with image generation capabilities, focusing on Java-based backend architecture, cloud integrations, and distributed system design.
 
-🌱 Actively deepening expertise in Java (backend development, concurrency, distributed system design) and major cloud platforms (AWS, Azure, GCP).
-At the same time, learning Go to broaden the backend skill set and prepare for building cloud-native, scalable, and high-performance services.
+In parallel, transitioning toward systems programming with Rust, building high-performance, memory-safe components and security-critical prototypes aligned with modern confidential computing paradigms.
+
+🌱 Actively deepening expertise in backend engineering (concurrency, distributed systems, performance optimization) and major cloud platforms (AWS, Azure, GCP).
+
+Expanding into Rust and low-level architecture to prepare for work in confidential computing, trusted execution environments (TEE), cryptographic attestation flows, and secure cloud-native infrastructure.
