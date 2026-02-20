@@ -26,6 +26,7 @@ export const ICONS = ${JSON.stringify(obj, null, 2)};
 function main() {
   // ВАЖНО: TypeScript бренд-иконки в FA Free нет → используем монограмму в генераторе.
   const icons = {
+    Rust: { ...pickFA(faRust), color: "#DEA584" },
     JavaScript: { ...pickFA(faJs), color: "#F7DF1E" },
     Java: { ...pickFA(faJava), color: "#ED8B00" },
     Go: { ...pickFA(faGolang), color: "#00ADD8" },
