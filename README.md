@@ -1,4 +1,4 @@
-# Hi there, I’m Dmitry!
+# Hi there, I’m Dmitrii!
 
 ## My Stack
 <img src="https://skillicons.dev/icons?i=rust,java,typescript,nodejs,nextjs,react,js,graphql,aws,azure,gcp,ai" 
